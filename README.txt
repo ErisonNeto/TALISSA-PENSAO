@@ -1,27 +1,44 @@
-TALISSA COLARES — LP FAMÍLIA E PENSÃO | V3
+TALISSA COLARES ADVOCACIA — LP FAMÍLIA / PENSÃO
+Versão refatorada e responsiva
 
-Versão redesenhada com identidade própria, sem replicar a composição visual da LP Araújo Gonçalves.
+ARQUIVOS
+- index.html
+- styles.css
+- script.js
+- assets/logo-talissa.png
 
-ESTRUTURA VISUAL
-- Hero editorial assimétrico, com fundo off-white + painel azul-marinho
-- Tipografia serifada de alto contraste
-- Serviços em linhas editoriais, sem grade de cards
-- Seção de pensão com trilho horizontal
-- Fluxo de atendimento em bloco azul
-- Área institucional baseada na identidade visual da marca
-- FAQ e CTA final
-- Layout mobile responsivo
-
-WHATSAPP
-Abra script.js e substitua:
-const WHATSAPP_NUMBER = '55XXXXXXXXXXX';
-
-Use somente números, incluindo 55 + DDD + número.
+ANTES DE PUBLICAR
+1. Abra script.js.
+2. Substitua:
+   const WHATSAPP_NUMBER = '55XXXXXXXXXXX';
+   pelo número profissional completo, somente com dígitos.
+   Exemplo: 5591999999999
 
 EVENTOS PREPARADOS
-triagem_iniciada
-triagem_concluida
-whatsapp_apos_triagem
+- triagem_iniciada
+- triagem_concluida
+- whatsapp_apos_triagem
 
-Instagram: @colarestalissa.adv
-OAB/PA 41.307
+MELHORIAS DESTA VERSÃO
+- HTML semântico revisado
+- hierarchy de headings organizada
+- navegação e modal mais acessíveis
+- foco preso dentro do modal e retorno ao botão de origem
+- menu mobile com estado ARIA sincronizado
+- FAQ com aria-controls/aria-expanded
+- correção de duplicidade potencial no tracking gtag/dataLayer
+- prevenção de conversão duplicada ao revisitar a etapa final da triagem
+- CSS reorganizado por componentes
+- grids com minmax para evitar estouro
+- tipografia fluida com clamp
+- breakpoints para desktop, tablet e mobile
+- correção de sobreposição da navbar em links âncora
+- botões e áreas de toque maiores no mobile
+- modal adaptado a telas baixas e safe-area
+- imagens com dimensões definidas para reduzir layout shift
+
+OBSERVAÇÃO
+A identidade visual, textos e estrutura principal foram preservados. A refatoração prioriza manutenção, responsividade, acessibilidade e estabilidade visual.
+
+AJUSTE 17/09/2026
+Setas de ação convertidas de caractere Unicode para SVG inline, garantindo renderização consistente no iPhone/Safari, Android e desktop.

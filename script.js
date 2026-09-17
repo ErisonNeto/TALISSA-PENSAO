@@ -2,10 +2,18 @@
 // Exemplo: 5591999999999
 const WHATSAPP_NUMBER = '55XXXXXXXXXXX';
 
-const state = { assunto: '', situacao: '', processo: '' };
+const state = {
+  assunto: '',
+  situacao: '',
+  processo: ''
+};
+
 let currentStep = 1;
+let lastFocusedElement = null;
+let completionTracked = false;
 
 const modal = document.getElementById('triageModal');
+const modalCard = modal?.querySelector('.modal-card');
 const progressBar = document.getElementById('progressBar');
 const summary = document.getElementById('triageSummary');
 const whatsappButton = document.getElementById('continueWhatsapp');
@@ -15,9 +23,11 @@ const menuButton = document.getElementById('menuButton');
 const mobileMenu = document.getElementById('mobileMenu');
 const waWidget = document.getElementById('waWidget');
 const waFab = document.getElementById('waFab');
+const waPopup = document.getElementById('waPopup');
 const waClose = document.getElementById('waClose');
+const year = document.getElementById('year');
 
-document.getElementById('year').textContent = new Date().getFullYear();
+if (year) year.textContent = new Date().getFullYear();
 
 const situationsByTopic = {
   'Pensão alimentícia': [
@@ -64,78 +74,177 @@ const situationsByTopic = {
 };
 
 function trackEvent(name, params = {}) {
+  // Evita o envio duplicado quando gtag já está disponível.
+  if (typeof window.gtag === 'function') {
+    window.gtag('event', name, params);
+    return;
+  }
+
   window.dataLayer = window.dataLayer || [];
   window.dataLayer.push({ event: name, ...params });
-  if (typeof window.gtag === 'function') window.gtag('event', name, params);
 }
 
-function closeMobileMenu() {
+function syncNavbarState() {
+  if (!navbar) return;
+  navbar.classList.toggle('scrolled', window.scrollY > 20);
+}
+
+function closeMobileMenu({ restoreFocus = false } = {}) {
+  if (!mobileMenu || !menuButton) return;
   mobileMenu.classList.remove('open');
   mobileMenu.setAttribute('aria-hidden', 'true');
   menuButton.setAttribute('aria-expanded', 'false');
+  menuButton.setAttribute('aria-label', 'Abrir menu');
+  if (restoreFocus) menuButton.focus();
 }
 
-menuButton.addEventListener('click', () => {
-  const open = !mobileMenu.classList.contains('open');
-  mobileMenu.classList.toggle('open', open);
-  mobileMenu.setAttribute('aria-hidden', String(!open));
-  menuButton.setAttribute('aria-expanded', String(open));
-});
-mobileMenu.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMobileMenu));
-window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 20), { passive: true });
+function toggleMobileMenu() {
+  if (!mobileMenu || !menuButton) return;
+  const willOpen = !mobileMenu.classList.contains('open');
+  mobileMenu.classList.toggle('open', willOpen);
+  mobileMenu.setAttribute('aria-hidden', String(!willOpen));
+  menuButton.setAttribute('aria-expanded', String(willOpen));
+  menuButton.setAttribute('aria-label', willOpen ? 'Fechar menu' : 'Abrir menu');
+}
 
-function renderSituationOptions() {
-  const options = situationsByTopic[state.assunto] || situationsByTopic['Outro assunto familiar'];
-  situationOptions.innerHTML = options.map(([value, sub]) => `
-    <button type="button" class="option dynamic-option" data-value="${value.replace(/"/g, '&quot;')}">
-      <span>${value}</span><small>${sub}</small>
-    </button>`).join('');
+function setWhatsappPopup(open) {
+  if (!waWidget || !waFab || !waPopup) return;
+  waWidget.classList.toggle('open', open);
+  waFab.setAttribute('aria-expanded', String(open));
+  waPopup.setAttribute('aria-hidden', String(!open));
+}
 
-  situationOptions.querySelectorAll('.dynamic-option').forEach(button => {
-    button.addEventListener('click', () => {
-      state.situacao = button.dataset.value;
-      button.classList.add('selected');
-      setTimeout(() => { currentStep = 3; updateStep(); }, 120);
-    });
+function clearSelected(field) {
+  document.querySelectorAll(`.option[data-field="${field}"].selected`).forEach((element) => {
+    element.classList.remove('selected');
   });
 }
 
-function openModal(topic = '') {
-  waWidget.classList.remove('open');
-  waFab.setAttribute('aria-expanded', 'false');
+function renderSituationOptions() {
+  if (!situationOptions) return;
+
+  const options = situationsByTopic[state.assunto] || situationsByTopic['Outro assunto familiar'];
+  situationOptions.replaceChildren();
+
+  options.forEach(([value, sub]) => {
+    const button = document.createElement('button');
+    const title = document.createElement('span');
+    const description = document.createElement('small');
+
+    button.type = 'button';
+    button.className = 'option dynamic-option';
+    button.dataset.value = value;
+    title.textContent = value;
+    description.textContent = sub;
+    button.append(title, description);
+
+    if (state.situacao === value) button.classList.add('selected');
+
+    button.addEventListener('click', () => {
+      situationOptions.querySelectorAll('.selected').forEach((item) => item.classList.remove('selected'));
+      state.situacao = value;
+      button.classList.add('selected');
+      window.setTimeout(() => {
+        currentStep = 3;
+        updateStep();
+      }, 100);
+    });
+
+    situationOptions.appendChild(button);
+  });
+}
+
+function getActiveStep() {
+  return modal?.querySelector(`.triage-step[data-step="${currentStep}"]`);
+}
+
+function focusActiveStep() {
+  const activeStep = getActiveStep();
+  const target = activeStep?.querySelector('h2, button, [href], [tabindex]:not([tabindex="-1"])');
+  if (target) target.focus({ preventScroll: true });
+}
+
+function openModal(topic = '', trigger = null) {
+  if (!modal) return;
+
+  setWhatsappPopup(false);
   closeMobileMenu();
-  modal.classList.add('open');
-  modal.setAttribute('aria-hidden', 'false');
-  document.body.classList.add('modal-open');
+
+  lastFocusedElement = trigger || document.activeElement;
+  completionTracked = false;
+
   state.assunto = topic || '';
   state.situacao = '';
   state.processo = '';
-  document.querySelectorAll('.option.selected').forEach(el => el.classList.remove('selected'));
   currentStep = topic ? 2 : 1;
+
+  document.querySelectorAll('.option.selected').forEach((element) => element.classList.remove('selected'));
+
   if (topic) renderSituationOptions();
+
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
+
   updateStep();
-  trackEvent('triagem_iniciada', { lp: 'familia_pensao', origem: topic ? 'cta_contextual' : 'cta_geral', assunto_preselecionado: topic || undefined });
+  window.requestAnimationFrame(focusActiveStep);
+
+  trackEvent('triagem_iniciada', {
+    lp: 'familia_pensao',
+    origem: topic ? 'cta_contextual' : 'cta_geral',
+    ...(topic ? { assunto_preselecionado: topic } : {})
+  });
 }
 
 function closeModal() {
+  if (!modal) return;
   modal.classList.remove('open');
   modal.setAttribute('aria-hidden', 'true');
   document.body.classList.remove('modal-open');
+
+  if (lastFocusedElement instanceof HTMLElement && document.contains(lastFocusedElement)) {
+    lastFocusedElement.focus({ preventScroll: true });
+  }
 }
 
 function updateStep() {
-  document.querySelectorAll('.triage-step').forEach(step => {
-    step.classList.toggle('active', Number(step.dataset.step) === currentStep);
+  if (!modal || !progressBar) return;
+
+  modal.querySelectorAll('.triage-step').forEach((step) => {
+    const isActive = Number(step.dataset.step) === currentStep;
+    step.classList.toggle('active', isActive);
+    step.setAttribute('aria-hidden', String(!isActive));
   });
+
   progressBar.style.width = `${(currentStep / 4) * 100}%`;
 
   if (currentStep === 2) renderSituationOptions();
-  if (currentStep === 4) {
-    summary.innerHTML = `
-      <div><span>Assunto</span><strong>${state.assunto}</strong></div>
-      <div><span>Situação</span><strong>${state.situacao}</strong></div>
-      <div><span>Processo</span><strong>${state.processo}</strong></div>`;
-    trackEvent('triagem_concluida', { lp: 'familia_pensao', assunto: state.assunto, situacao: state.situacao, processo: state.processo });
+
+  if (currentStep === 4 && summary) {
+    summary.replaceChildren();
+    [
+      ['Assunto', state.assunto],
+      ['Situação', state.situacao],
+      ['Processo', state.processo]
+    ].forEach(([label, value]) => {
+      const row = document.createElement('div');
+      const labelEl = document.createElement('span');
+      const valueEl = document.createElement('strong');
+      labelEl.textContent = label;
+      valueEl.textContent = value;
+      row.append(labelEl, valueEl);
+      summary.appendChild(row);
+    });
+
+    if (!completionTracked) {
+      completionTracked = true;
+      trackEvent('triagem_concluida', {
+        lp: 'familia_pensao',
+        assunto: state.assunto,
+        situacao: state.situacao,
+        processo: state.processo
+      });
+    }
   }
 }
 
@@ -143,43 +252,89 @@ function isWhatsappConfigured() {
   return /^55\d{10,11}$/.test(WHATSAPP_NUMBER);
 }
 
-document.querySelectorAll('.js-open-triage').forEach(el => {
-  el.addEventListener('click', event => {
+function handleModalFocusTrap(event) {
+  if (event.key !== 'Tab' || !modal?.classList.contains('open') || !modalCard) return;
+
+  const focusable = Array.from(
+    modalCard.querySelectorAll('button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')
+  ).filter((element) => element.offsetParent !== null);
+
+  if (!focusable.length) return;
+
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+
+  if (event.shiftKey && document.activeElement === first) {
     event.preventDefault();
-    openModal(el.dataset.topic || '');
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+}
+
+menuButton?.addEventListener('click', toggleMobileMenu);
+mobileMenu?.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => closeMobileMenu()));
+
+window.addEventListener('scroll', syncNavbarState, { passive: true });
+syncNavbarState();
+
+window.addEventListener('resize', () => {
+  if (window.innerWidth > 940) closeMobileMenu();
+});
+
+document.querySelectorAll('.js-open-triage').forEach((element) => {
+  element.addEventListener('click', (event) => {
+    event.preventDefault();
+    openModal(element.dataset.topic || '', element);
   });
 });
 
-document.querySelectorAll('[data-close-modal]').forEach(el => el.addEventListener('click', closeModal));
+document.querySelectorAll('[data-close-modal]').forEach((element) => {
+  element.addEventListener('click', closeModal);
+});
 
-document.querySelectorAll('.option[data-field="assunto"]').forEach(button => {
+document.querySelectorAll('.option[data-field="assunto"]').forEach((button) => {
   button.addEventListener('click', () => {
-    state.assunto = button.dataset.value;
+    clearSelected('assunto');
+    state.assunto = button.dataset.value || '';
+    state.situacao = '';
+    state.processo = '';
     button.classList.add('selected');
-    setTimeout(() => { currentStep = 2; updateStep(); }, 120);
+
+    window.setTimeout(() => {
+      currentStep = 2;
+      updateStep();
+    }, 100);
   });
 });
 
-document.querySelectorAll('.option[data-field="processo"]').forEach(button => {
+document.querySelectorAll('.option[data-field="processo"]').forEach((button) => {
   button.addEventListener('click', () => {
-    state.processo = button.dataset.value;
+    clearSelected('processo');
+    state.processo = button.dataset.value || '';
     button.classList.add('selected');
-    setTimeout(() => { currentStep = 4; updateStep(); }, 120);
+
+    window.setTimeout(() => {
+      currentStep = 4;
+      updateStep();
+    }, 100);
   });
 });
 
-document.querySelectorAll('[data-back]').forEach(button => {
+document.querySelectorAll('[data-back]').forEach((button) => {
   button.addEventListener('click', () => {
     if (currentStep === 4) currentStep = 3;
     else if (currentStep === 3) currentStep = 2;
     else currentStep = 1;
     updateStep();
+    window.requestAnimationFrame(focusActiveStep);
   });
 });
 
-whatsappButton.addEventListener('click', () => {
+whatsappButton?.addEventListener('click', () => {
   if (!isWhatsappConfigured()) {
-    alert('Configure o número do WhatsApp no arquivo script.js antes de publicar a página.');
+    window.alert('Configure o número do WhatsApp no arquivo script.js antes de publicar a página.');
     return;
   }
 
@@ -191,58 +346,80 @@ whatsappButton.addEventListener('click', () => {
     `Já existe processo em andamento: ${state.processo}`
   ].join('\n');
 
-  trackEvent('whatsapp_apos_triagem', { lp: 'familia_pensao', assunto: state.assunto, situacao: state.situacao, processo: state.processo });
+  trackEvent('whatsapp_apos_triagem', {
+    lp: 'familia_pensao',
+    assunto: state.assunto,
+    situacao: state.situacao,
+    processo: state.processo
+  });
+
   window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
 });
 
-waFab.addEventListener('click', () => {
-  const open = !waWidget.classList.contains('open');
-  waWidget.classList.toggle('open', open);
-  waFab.setAttribute('aria-expanded', String(open));
-  document.getElementById('waPopup').setAttribute('aria-hidden', String(!open));
-});
-waClose.addEventListener('click', () => {
-  waWidget.classList.remove('open');
-  waFab.setAttribute('aria-expanded', 'false');
+waFab?.addEventListener('click', () => {
+  setWhatsappPopup(!waWidget?.classList.contains('open'));
 });
 
-document.querySelectorAll('.faq-question').forEach(question => {
+waClose?.addEventListener('click', () => {
+  setWhatsappPopup(false);
+  waFab?.focus();
+});
+
+document.querySelectorAll('.faq-question').forEach((question) => {
   question.addEventListener('click', () => {
     const item = question.closest('.faq-item');
-    const open = item.classList.contains('open');
-    document.querySelectorAll('.faq-item.open').forEach(other => {
-      if (other !== item) {
-        other.classList.remove('open');
-        other.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
-      }
+    if (!item) return;
+
+    const willOpen = !item.classList.contains('open');
+
+    document.querySelectorAll('.faq-item.open').forEach((other) => {
+      if (other === item) return;
+      other.classList.remove('open');
+      other.querySelector('.faq-question')?.setAttribute('aria-expanded', 'false');
     });
-    item.classList.toggle('open', !open);
-    question.setAttribute('aria-expanded', String(!open));
+
+    item.classList.toggle('open', willOpen);
+    question.setAttribute('aria-expanded', String(willOpen));
   });
 });
 
-document.addEventListener('click', event => {
-  if (!waWidget.contains(event.target) && waWidget.classList.contains('open')) {
-    waWidget.classList.remove('open');
-    waFab.setAttribute('aria-expanded', 'false');
+document.addEventListener('click', (event) => {
+  if (waWidget && !waWidget.contains(event.target) && waWidget.classList.contains('open')) {
+    setWhatsappPopup(false);
   }
 });
 
-window.addEventListener('keydown', event => {
-  if (event.key === 'Escape') {
-    if (modal.classList.contains('open')) closeModal();
-    waWidget.classList.remove('open');
-    closeMobileMenu();
+document.addEventListener('keydown', (event) => {
+  handleModalFocusTrap(event);
+
+  if (event.key !== 'Escape') return;
+
+  if (modal?.classList.contains('open')) {
+    closeModal();
+    return;
+  }
+
+  if (waWidget?.classList.contains('open')) {
+    setWhatsappPopup(false);
+    waFab?.focus();
+    return;
+  }
+
+  if (mobileMenu?.classList.contains('open')) {
+    closeMobileMenu({ restoreFocus: true });
   }
 });
 
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
+if ('IntersectionObserver' in window) {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
       entry.target.classList.add('visible');
       observer.unobserve(entry.target);
-    }
-  });
-}, { threshold: .1 });
+    });
+  }, { threshold: 0.1 });
 
-document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  document.querySelectorAll('.reveal').forEach((element) => observer.observe(element));
+} else {
+  document.querySelectorAll('.reveal').forEach((element) => element.classList.add('visible'));
+}
