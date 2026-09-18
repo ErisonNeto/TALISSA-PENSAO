@@ -88,9 +88,9 @@
 </div>
 </div>
 <div class="container pension-rail">
-<article class="rail-item reveal"><span aria-hidden="true">01</span><strong>Pedir pensão</strong><p>Quando ainda não existe um valor formalmente definido.</p></article>
-<article class="rail-item reveal delay-1"><span aria-hidden="true">02</span><strong>Cobrar atrasados</strong><p>Quando existem parcelas não pagas ou pagamentos irregulares.</p></article>
-<article class="rail-item reveal delay-2"><span aria-hidden="true">03</span><strong>Revisar o valor</strong><p>Quando a realidade financeira ou as necessidades mudaram.</p></article>
+<article class="rail-item reveal"><span aria-hidden="true">01</span><h3>Pedir pensão</h3><p>Quando ainda não existe um valor formalmente definido.</p></article>
+<article class="rail-item reveal delay-1"><span aria-hidden="true">02</span><h3>Cobrar atrasados</h3><p>Quando existem parcelas não pagas ou pagamentos irregulares.</p></article>
+<article class="rail-item reveal delay-2"><span aria-hidden="true">03</span><h3>Revisar o valor</h3><p>Quando a realidade financeira ou as necessidades mudaram.</p></article>
 </div>
 </section><section aria-labelledby="other-family-title" class="decision-section" id="outros">
 <div class="container decision-head reveal">
@@ -117,14 +117,14 @@
 <div><span>03</span><strong>Continue no WhatsApp</strong><p>A mensagem segue organizada para o atendimento.</p></div>
 </div>
 </div>
-<div class="container closing-faq" id="duvidas">
-<div class="closing-faq-title reveal"><p class="compact-eyebrow">DÚVIDAS FREQUENTES</p><h2>Antes de entrar em contato.</h2></div>
+<section aria-labelledby="faq-title" class="container closing-faq" id="duvidas">
+<div class="closing-faq-title reveal"><p class="compact-eyebrow">DÚVIDAS FREQUENTES</p><h2 id="faq-title">Antes de entrar em contato.</h2></div>
 <div class="faq-list reveal delay-1">
-<article class="faq-item"><h3><button aria-controls="faq-answer-1" aria-expanded="false" class="faq-question" type="button"><span>Posso cobrar pensão atrasada?</span><b aria-hidden="true">+</b></button></h3><div class="faq-answer" id="faq-answer-1"><div><p>Existem medidas jurídicas para buscar parcelas não pagas. A análise depende do título existente, do período em atraso e dos detalhes do caso.</p></div></div></article>
-<article class="faq-item"><h3><button aria-controls="faq-answer-2" aria-expanded="false" class="faq-question" type="button"><span>O valor da pensão pode ser alterado?</span><b aria-hidden="true">+</b></button></h3><div class="faq-answer" id="faq-answer-2"><div><p>Mudanças relevantes nas necessidades ou nas condições financeiras podem justificar uma nova análise do valor.</p></div></div></article>
-<article class="faq-item"><h3><button aria-controls="faq-answer-3" aria-expanded="false" class="faq-question" type="button"><span>Preciso já ter um processo?</span><b aria-hidden="true">+</b></button></h3><div class="faq-answer" id="faq-answer-3"><div><p>Não. O primeiro contato pode acontecer antes de existir processo, para compreender a situação e avaliar os caminhos possíveis.</p></div></div></article>
+<article class="faq-item"><h3><button aria-controls="faq-answer-1" aria-expanded="false" class="faq-question" type="button"><span>Posso cobrar pensão atrasada?</span><b aria-hidden="true">+</b></button></h3><div aria-hidden="true" class="faq-answer" id="faq-answer-1"><div><p>Existem medidas jurídicas para buscar parcelas não pagas. A análise depende do título existente, do período em atraso e dos detalhes do caso.</p></div></div></article>
+<article class="faq-item"><h3><button aria-controls="faq-answer-2" aria-expanded="false" class="faq-question" type="button"><span>O valor da pensão pode ser alterado?</span><b aria-hidden="true">+</b></button></h3><div aria-hidden="true" class="faq-answer" id="faq-answer-2"><div><p>Mudanças relevantes nas necessidades ou nas condições financeiras podem justificar uma nova análise do valor.</p></div></div></article>
+<article class="faq-item"><h3><button aria-controls="faq-answer-3" aria-expanded="false" class="faq-question" type="button"><span>Preciso já ter um processo?</span><b aria-hidden="true">+</b></button></h3><div aria-hidden="true" class="faq-answer" id="faq-answer-3"><div><p>Não. O primeiro contato pode acontecer antes de existir processo, para compreender a situação e avaliar os caminhos possíveis.</p></div></div></article>
 </div>
-</div>
+</section>
 <div class="container closing-cta reveal">
 <div><span>ATENDIMENTO INICIAL</span><h2>Precisa entender o que pode ser feito no seu caso?</h2><p>Explique brevemente sua situação e continue o atendimento pelo WhatsApp.</p></div>
 <button class="closing-cta-button js-open-triage" type="button">Falar sobre meu caso <svg aria-hidden="true" class="arrow-icon" focusable="false" viewbox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"></path></svg></button>
@@ -133,7 +133,7 @@
 </main>
 <footer class="footer">
 <div class="container footer-grid">
-<div class="footer-brand"><img alt="" height="302" loading="lazy" src="assets/logo-talissa.png" width="948"/></div>
+<div class="footer-brand"><img alt="Talissa Colares Advocacia" height="302" loading="lazy" src="assets/logo-talissa.png" width="948"/></div>
 <div class="footer-copy"><p>Atendimento jurídico em Direito de Família com análise individual do caso.</p><span>OAB/PA 41.307</span></div>
 <nav aria-label="Navegação do rodapé" class="footer-links"><a href="#pensao">Pensão</a><a href="#outros">Outros assuntos</a><a href="#duvidas">Dúvidas</a><a href="https://www.instagram.com/colarestalissa.adv/" rel="noopener noreferrer" target="_blank">Instagram</a></nav>
 </div>
@@ -190,7 +190,7 @@
 <div class="triage-step" data-step="4">
 <span class="step-label done">Triagem concluída</span>
 <h2>Pronto. Agora continue pelo WhatsApp.</h2>
-<div class="triage-summary" id="triageSummary"></div>
+<div aria-live="polite" class="triage-summary" id="triageSummary"></div>
 <button class="modal-primary" id="continueWhatsapp" type="button">Continuar pelo WhatsApp <svg aria-hidden="true" class="arrow-icon" focusable="false" viewbox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"></path></svg></button>
 <button class="back-button" data-back="" type="button">← Revisar resposta anterior</button>
 <small class="privacy-note">As informações serão usadas apenas para contextualizar o atendimento inicial.</small>
