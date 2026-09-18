@@ -2426,3 +2426,134 @@ section[id] {
   .modal-card h2{font-size:31px;margin-bottom:18px}
   .option{min-height:56px}
 }
+
+
+/* ==========================================================
+   HERO DE CONVERSÃO — alerta visual + CTA sinalizado
+   Mantém a identidade da marca sem recorrer a urgência falsa.
+========================================================== */
+.hero-alert{
+  width:fit-content;
+  max-width:100%;
+  margin-top:22px;
+  padding:9px 13px;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  border:1px solid rgba(20,39,105,.18);
+  background:rgba(255,255,255,.66);
+  box-shadow:0 10px 30px rgba(2,3,24,.045);
+  color:var(--navy);
+  font-size:10px;
+  line-height:1.35;
+}
+.hero-alert strong{
+  text-transform:uppercase;
+  letter-spacing:.09em;
+  font-size:9px;
+  white-space:nowrap;
+}
+.hero-alert>span:last-child{
+  color:#5f6270;
+}
+.hero-alert-dot{
+  width:8px;
+  height:8px;
+  flex:0 0 8px;
+  border-radius:50%;
+  background:var(--blue);
+  box-shadow:0 0 0 0 rgba(20,39,105,.30);
+  animation:heroAlertPulse 2.2s ease-out infinite;
+}
+
+.sales-copy h1{
+  margin-top:18px;
+}
+.sales-lead{
+  max-width:690px;
+}
+
+.cta-attention-wrap{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:8px;
+}
+.cta-attention-label{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  color:var(--blue);
+  font-size:8px;
+  font-weight:800;
+  line-height:1;
+  text-transform:uppercase;
+  letter-spacing:.14em;
+}
+.cta-attention-label i{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:var(--blue);
+  box-shadow:0 0 0 0 rgba(20,39,105,.24);
+  animation:heroAlertPulse 2.2s ease-out infinite;
+}
+
+.cta-pulse{
+  position:relative;
+  isolation:isolate;
+  box-shadow:0 16px 38px rgba(20,39,105,.24);
+}
+.cta-pulse::after{
+  content:"";
+  position:absolute;
+  inset:-7px;
+  z-index:-1;
+  border:1.5px solid rgba(20,39,105,.36);
+  pointer-events:none;
+  opacity:0;
+  transform:scale(.97);
+  animation:ctaSignal 2.65s ease-out infinite;
+}
+.cta-pulse:hover{
+  box-shadow:0 18px 44px rgba(20,39,105,.32);
+}
+
+@keyframes heroAlertPulse{
+  0%{box-shadow:0 0 0 0 rgba(20,39,105,.30)}
+  65%{box-shadow:0 0 0 8px rgba(20,39,105,0)}
+  100%{box-shadow:0 0 0 0 rgba(20,39,105,0)}
+}
+@keyframes ctaSignal{
+  0%{opacity:0;transform:scale(.97)}
+  18%{opacity:.7}
+  72%{opacity:.08;transform:scale(1.07)}
+  100%{opacity:0;transform:scale(1.10)}
+}
+
+@media(max-width:720px){
+  .hero-alert{
+    width:100%;
+    display:grid;
+    grid-template-columns:auto 1fr;
+    gap:4px 9px;
+    margin-top:18px;
+    padding:10px 12px;
+  }
+  .hero-alert-dot{grid-row:1 / span 2;align-self:center}
+  .hero-alert strong{white-space:normal}
+  .hero-alert>span:last-child{font-size:9px}
+  .sales-copy h1{margin-top:18px}
+  .sales-actions{gap:16px}
+  .cta-attention-wrap{width:100%}
+  .cta-attention-label{padding-left:2px}
+  .cta-pulse{width:100%}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .hero-alert-dot,
+  .cta-attention-label i,
+  .cta-pulse::after{
+    animation:none!important;
+  }
+}

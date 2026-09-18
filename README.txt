@@ -15,3 +15,11 @@ Eventos já preparados:
 - triagem_iniciada
 - triagem_concluida
 - whatsapp_apos_triagem
+
+
+ATUALIZAÇÃO CRO
+- Hero mais direto para pensão alimentícia.
+- Alerta visual informativo sem promessa de resultado.
+- CTA principal "Quero analisar meu caso" com sinalização/pulso sutil.
+- CTA mobile alinhado à mesma ação.
+- Animações respeitam prefers-reduced-motion.
