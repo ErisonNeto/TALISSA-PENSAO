@@ -14,6 +14,7 @@
   --line: #dbe0e5;
   --green: #21b66f;
   --serif: "Cormorant Garamond", Georgia, serif;
+  --display: "Italiana", "Cormorant Garamond", Georgia, serif;
   --sans: "Inter", Arial, sans-serif;
   --shadow: 0 30px 80px rgba(3, 11, 25, 0.14);
   --radius: 3px;
@@ -371,30 +372,29 @@ section[id] {
 }
 
 .eyebrow {
+  display: block;
   margin-bottom: 23px;
   color: var(--gold-300);
   text-transform: uppercase;
 }
 
-.eyebrow span {
-  width: 30px;
-  height: 1px;
-  background: currentColor;
+.eyebrow > span {
+  display: none;
 }
 
 .hero h1 {
   max-width: 730px;
   margin-bottom: 20px;
-  font-family: var(--serif);
+  font-family: var(--display);
   font-size: clamp(3.25rem, 5.2vw, 5.2rem);
-  font-weight: 500;
+  font-weight: 400;
   line-height: 0.94;
-  letter-spacing: -0.045em;
+  letter-spacing: -0.025em;
 }
 
 .hero h1 em {
   color: var(--gold-300);
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .hero-lead {
