@@ -34,3 +34,22 @@ PRINCIPAIS AJUSTES DESTA VERSÃO
 OBSERVAÇÃO SOBRE LOCALIZAÇÃO
 - O mapa aponta para Belém de forma geral. Quando o endereço profissional for confirmado,
   atualize o marcador e o texto da seção de localização.
+
+CONVERSÃO DE CONTATO — GOOGLE ADS (22/09/2026)
+- A Google tag AW-18468675729 já estava instalada no <head> e foi mantida.
+- A ação de conversão "Contato" foi ligada a cliques que levam ao WhatsApp:
+  botão "Continuar pelo WhatsApp" depois da triagem e contato direto do rodapé.
+- Send_to: AW-18468675729/T1QfCLTHeYEdEJHBxu2E
+- Valor: 1.0 BRL, conforme snippet exibido no Google Ads.
+- Abrir a triagem, selecionar tema ou expandir o flutuante NÃO conta conversão.
+- Proteção de 1,8 s contra duplo clique no botão de continuação.
+- A ação "Contato" mede um clique de saída, NÃO mensagem enviada ou contrato.
+
+PARA VALIDAR DEPOIS DO DEPLOY
+1. Publique a versão atualizada na Vercel e abra familiar.talissacolaresadv.com.br.
+2. Use o Google Tag Assistant para conferir AW-18468675729 e o disparo de
+   AW-18468675729/T1QfCLTHeYEdEJHBxu2E ao clicar em Continuar pelo WhatsApp.
+3. Teste também o link direto do rodapé e confira que abrir apenas a triagem
+   não dispara a conversão.
+4. Aguarde o processamento do Google Ads; não interprete ausência imediata
+   do status "Registrando conversões" como falha da tag.

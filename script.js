@@ -2,6 +2,9 @@
 
 const WHATSAPP_NUMBER = '559188413702';
 
+// Conversão Google Ads: Contato (clique que efetivamente abre o WhatsApp).
+const GOOGLE_ADS_CONTACT_SEND_TO = 'AW-18468675729/T1QfCLTHeYEdEJHBxu2E';
+
 const state = {
   assunto: '',
   situacao: '',
@@ -79,6 +82,36 @@ function trackEvent(name, params = {}) {
 
   window.dataLayer = window.dataLayer || [];
   window.dataLayer.push({ event: name, ...params });
+}
+
+/**
+ * Registra o clique de contato no Google Ads. Não dispara na abertura da triagem:
+ * a conversão acontece somente quando o visitante segue para o WhatsApp.
+ *
+ * A chamada acontece no clique, enquanto a aba original permanece aberta.
+ * Se o navegador bloquear a nova aba, o callback/timeout libera a navegação
+ * nesta aba sem perder o destino do visitante.
+ */
+function trackWhatsappAdsConversion(onNavigationFallback = null) {
+  let navigated = false;
+  const finish = () => {
+    if (navigated) return;
+    navigated = true;
+    if (typeof onNavigationFallback === 'function') onNavigationFallback();
+  };
+
+  if (typeof window.gtag === 'function') {
+    window.gtag('event', 'conversion', {
+      send_to: GOOGLE_ADS_CONTACT_SEND_TO,
+      value: 1.0,
+      currency: 'BRL',
+      ...(onNavigationFallback ? { event_callback: finish, event_timeout: 1500 } : {})
+    });
+  } else if (onNavigationFallback) {
+    finish();
+  }
+
+  if (onNavigationFallback) window.setTimeout(finish, 1500);
 }
 
 function syncNavbarState() {
@@ -381,6 +414,7 @@ document.querySelectorAll('[data-back]').forEach((button) => {
 });
 
 whatsappButton?.addEventListener('click', () => {
+  if (whatsappButton.disabled) return;
   if (!isWhatsappConfigured()) {
     window.alert('Configure o número do WhatsApp no arquivo script.js antes de publicar a página.');
     return;
@@ -402,12 +436,31 @@ whatsappButton?.addEventListener('click', () => {
   });
 
   const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-  const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
+
+  // Impede duas conversões por clique duplo e não interrompe a triagem.
+  whatsappButton.disabled = true;
+  window.setTimeout(() => { whatsappButton.disabled = false; }, 1800);
+
+  // Abre a nova aba de forma síncrona (para evitar bloqueio de pop-up).
+  // A tag é disparada no mesmo clique, enquanto a LP permanece aberta.
+  const newWindow = window.open(url, '_blank');
   if (newWindow) {
     newWindow.opener = null;
+    trackWhatsappAdsConversion();
   } else {
-    window.location.assign(url);
+    // Se o pop-up for bloqueado, espera o callback da tag ou até 1,5 s
+    // antes de navegar nesta aba. Não dispara a conversão novamente.
+    trackWhatsappAdsConversion(() => window.location.assign(url));
   }
+});
+
+// Contato direto do rodapé (não passa pela triagem).
+document.querySelectorAll('a[data-whatsapp-direct]').forEach((link) => {
+  link.addEventListener('click', () => {
+    trackEvent('whatsapp_direto', { lp: 'direito_familia_belem', origem: 'rodape' });
+    trackWhatsappAdsConversion();
+    // Mantém target="_blank", rel="noopener noreferrer" e a navegação nativa.
+  });
 });
 
 waFab?.addEventListener('click', () => {
