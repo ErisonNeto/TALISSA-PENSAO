@@ -1,6 +1,6 @@
 'use strict';
 
-const WHATSAPP_NUMBER = '55XXXXXXXXXXX';
+const WHATSAPP_NUMBER = '559188413702';
 
 const state = {
   assunto: '',
@@ -90,6 +90,7 @@ function closeMobileMenu({ restoreFocus = false } = {}) {
 
   mobileMenu.classList.remove('open');
   mobileMenu.setAttribute('aria-hidden', 'true');
+  mobileMenu.inert = true;
   menuButton.setAttribute('aria-expanded', 'false');
   menuButton.setAttribute('aria-label', 'Abrir menu');
 
@@ -102,6 +103,7 @@ function toggleMobileMenu() {
   const willOpen = !mobileMenu.classList.contains('open');
   mobileMenu.classList.toggle('open', willOpen);
   mobileMenu.setAttribute('aria-hidden', String(!willOpen));
+  mobileMenu.inert = !willOpen;
   menuButton.setAttribute('aria-expanded', String(willOpen));
   menuButton.setAttribute('aria-label', willOpen ? 'Fechar menu' : 'Abrir menu');
 }
@@ -112,6 +114,7 @@ function setWhatsappPopup(open) {
   waWidget.classList.toggle('open', open);
   waFab.setAttribute('aria-expanded', String(open));
   waPopup.setAttribute('aria-hidden', String(!open));
+  waPopup.inert = !open;
 }
 
 function clearSelected(field) {
@@ -194,13 +197,14 @@ function openModal(topic = '', trigger = null) {
 
   modal.classList.add('open');
   modal.setAttribute('aria-hidden', 'false');
+  modal.inert = false;
   document.body.classList.add('modal-open');
 
   updateStep();
   window.requestAnimationFrame(focusActiveStep);
 
   trackEvent('triagem_iniciada', {
-    lp: 'familia_pensao',
+    lp: 'direito_familia_belem',
     origem: topic ? 'cta_contextual' : 'cta_geral',
     ...(topic ? { assunto_preselecionado: topic } : {})
   });
@@ -211,6 +215,7 @@ function closeModal() {
 
   modal.classList.remove('open');
   modal.setAttribute('aria-hidden', 'true');
+  modal.inert = true;
   document.body.classList.remove('modal-open');
 
   if (lastFocusedElement instanceof HTMLElement && document.contains(lastFocusedElement)) {
@@ -253,7 +258,7 @@ function updateStep() {
     if (!completionTracked) {
       completionTracked = true;
       trackEvent('triagem_concluida', {
-        lp: 'familia_pensao',
+        lp: 'direito_familia_belem',
         assunto: state.assunto,
         situacao: state.situacao,
         processo: state.processo
@@ -310,6 +315,10 @@ function toggleFaq(question) {
 
 if (year) year.textContent = String(new Date().getFullYear());
 
+if (mobileMenu) mobileMenu.inert = true;
+if (waPopup) waPopup.inert = true;
+if (modal) modal.inert = true;
+
 menuButton?.addEventListener('click', toggleMobileMenu);
 mobileMenu?.querySelectorAll('a').forEach((link) => {
   link.addEventListener('click', () => closeMobileMenu());
@@ -319,7 +328,7 @@ window.addEventListener('scroll', syncNavbarState, { passive: true });
 syncNavbarState();
 
 window.addEventListener('resize', () => {
-  if (window.innerWidth > 940) closeMobileMenu();
+  if (window.innerWidth > 1080) closeMobileMenu();
 });
 
 document.querySelectorAll('.js-open-triage').forEach((element) => {
@@ -386,7 +395,7 @@ whatsappButton?.addEventListener('click', () => {
   ].join('\n');
 
   trackEvent('whatsapp_apos_triagem', {
-    lp: 'familia_pensao',
+    lp: 'direito_familia_belem',
     assunto: state.assunto,
     situacao: state.situacao,
     processo: state.processo
@@ -394,7 +403,11 @@ whatsappButton?.addEventListener('click', () => {
 
   const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
   const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
-  if (newWindow) newWindow.opener = null;
+  if (newWindow) {
+    newWindow.opener = null;
+  } else {
+    window.location.assign(url);
+  }
 });
 
 waFab?.addEventListener('click', () => {
