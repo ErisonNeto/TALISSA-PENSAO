@@ -3,7 +3,7 @@
 const WHATSAPP_NUMBER = '559188413702';
 
 // Conversão Google Ads: Contato (clique que efetivamente abre o WhatsApp).
-const GOOGLE_ADS_CONTACT_SEND_TO = 'AW-18468675729/T1QfCLTHeYEdEJHBxu2E';
+const GOOGLE_ADS_CONTACT_SEND_TO = 'AW-18468675729/TlQfCLTHzYEdEJHBxuZE';
 
 const state = {
   assunto: '',
